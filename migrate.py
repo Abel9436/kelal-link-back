@@ -47,6 +47,7 @@ async def migrate():
     print("Checking for missing columns...")
     
     # User associated columns
+    await add_column("users", "username", "VARCHAR UNIQUE")
     await add_column("urls", "user_id", "INTEGER REFERENCES users(id)")
     await add_column("bundles", "user_id", "INTEGER REFERENCES users(id)")
     
