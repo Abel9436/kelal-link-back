@@ -15,6 +15,11 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+# Remove any sync-only parameters if they exist (though asyncpg is usually fine with them)
+if "?sslmode=" in DATABASE_URL:
+    # Some platforms add this, but asyncpg prefers the connect_args approach
+    DATABASE_URL = DATABASE_URL.split("?")[0]
+
 connect_args = {}
 if "localhost" not in DATABASE_URL and "@db" not in DATABASE_URL:
     connect_args = {"ssl": True}
