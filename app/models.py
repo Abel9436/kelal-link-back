@@ -50,6 +50,8 @@ class Bundle(Base):
     text_color = Column(String, default="#888888") # Default to primary muted
     title_color = Column(String, default="#ffffff") # Default to contrast white
     card_color = Column(String, default="rgba(255,255,255,0.05)") # Default to subtle glass
+    bg_image = Column(String, nullable=True) # URL to background image/gif
+    profile_image = Column(String, nullable=True) # URL to custom profile image
     clicks = Column(Integer, default=0)
     max_clicks = Column(Integer, nullable=True)
     expires_at = Column(DateTime(timezone=True), nullable=True)

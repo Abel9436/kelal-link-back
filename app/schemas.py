@@ -72,6 +72,8 @@ class BundleCreate(BaseModel):
     text_color: Optional[str] = "#888888"
     title_color: Optional[str] = "#ffffff"
     card_color: Optional[str] = "rgba(255,255,255,0.05)"
+    bg_image: Optional[str] = None
+    profile_image: Optional[str] = None
     custom_slug: Optional[str] = None
     max_clicks: Optional[int] = None
     expires_in: Optional[int] = None
@@ -90,6 +92,8 @@ class BundleUpdate(BaseModel):
     text_color: Optional[str] = None
     title_color: Optional[str] = None
     card_color: Optional[str] = None
+    bg_image: Optional[str] = None
+    profile_image: Optional[str] = None
     max_clicks: Optional[int] = None
     expires_at: Optional[datetime] = None
     password: Optional[str] = None
@@ -106,6 +110,8 @@ class BundleInfo(BaseModel):
     text_color: str
     title_color: str
     card_color: str
+    bg_image: Optional[str] = None
+    profile_image: Optional[str] = None
     clicks: int
     max_clicks: Optional[int]
     expires_at: Optional[datetime]

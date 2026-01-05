@@ -68,6 +68,8 @@ async def migrate():
     await add_column("bundles", "password", "VARCHAR")
     await add_column("bundles", "meta_title", "VARCHAR")
     await add_column("bundles", "meta_description", "VARCHAR")
+    await add_column("bundles", "bg_image", "VARCHAR")
+    await add_column("bundles", "profile_image", "VARCHAR")
 
     await engine.dispose()
     print("Migration protocol complete.")

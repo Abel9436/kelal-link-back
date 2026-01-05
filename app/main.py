@@ -252,6 +252,8 @@ async def update_bundle(
     if data.password: bundle_obj.password = hashlib.sha256(data.password.encode()).hexdigest()
     if data.meta_title is not None: bundle_obj.meta_title = data.meta_title
     if data.meta_description is not None: bundle_obj.meta_description = data.meta_description
+    if data.bg_image is not None: bundle_obj.bg_image = data.bg_image
+    if data.profile_image is not None: bundle_obj.profile_image = data.profile_image
     
     await db.commit()
     await db.refresh(bundle_obj)
@@ -351,6 +353,8 @@ async def create_bundle(
         password=hashlib.sha256(data.password.encode()).hexdigest() if data.password else None,
         meta_title=data.meta_title,
         meta_description=data.meta_description,
+        bg_image=data.bg_image,
+        profile_image=data.profile_image,
         user_id=user.id if user else None
     )
     db.add(new_bundle)
