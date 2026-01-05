@@ -1,0 +1,24 @@
+Checking for missing columns...
+max_clicks column might already exist: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.DuplicateColumnError'>: column "max_clicks" of relation "urls" already exists
+[SQL: ALTER TABLE urls ADD COLUMN max_clicks INTEGER]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+expires_at column might already exist: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE urls ADD COLUMN expires_at TIMESTAMP WITH TIME ZONE]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+urls.password column might already exist
+bundles.theme_color error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE bundles ADD COLUMN theme_color VARCHAR DEFAULT '#00f2ff']
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+bundles.user_id error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE bundles ADD COLUMN user_id INTEGER REFERENCES users(id)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+bundles.max_clicks error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE bundles ADD COLUMN max_clicks INTEGER]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+bundles.expires_at error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE bundles ADD COLUMN expires_at TIMESTAMP WITH TIME ZONE]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+bundles.password error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: ALTER TABLE bundles ADD COLUMN password VARCHAR]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+Migration complete!
