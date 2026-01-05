@@ -5,6 +5,7 @@ from datetime import datetime
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
+    username: Optional[str] = None
     profile_pic: Optional[str] = None
 
 class UserInfo(UserBase):
@@ -62,6 +63,7 @@ class URLInfo(BaseModel):
 class BundleItem(BaseModel):
     label: str
     url: HttpUrl
+    is_spotlight: Optional[bool] = False
 
 class BundleCreate(BaseModel):
     title: str

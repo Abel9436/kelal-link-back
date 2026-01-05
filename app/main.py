@@ -145,6 +145,76 @@ async def get_my_drops(
         "bundles": bundles_res.scalars().all()
     }
 
+@app.put("/api/user/profile")
+async def update_profile(
+    data: dict,
+    user: models.User = Depends(get_current_user),
+    db: AsyncSession = Depends(database.get_db)
+):
+    if "username" in data:
+        username = data["username"].lower().strip()
+        if not username:
+             user.username = None
+        else:
+            # Simple regex for username
+            import re
+            if not re.match(r"^[a-z0-9_-]{3,20}$", username):
+                raise HTTPException(status_code=400, detail="Username must be 3-20 chars (a-z, 0-9, _, -)")
+            
+            res = await db.execute(select(models.User).where(models.User.username == username, models.User.id != user.id))
+            if res.scalar_one_or_none():
+                raise HTTPException(status_code=400, detail="Username already taken")
+            user.username = username
+    
+    if "name" in data:
+        user.name = data["name"]
+        
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+@app.get("/api/studio/{username}")
+async def get_studio_hub(username: str, db: AsyncSession = Depends(database.get_db)):
+    res = await db.execute(select(models.User).where(models.User.username == username.lower()))
+    user = res.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Studio not found")
+        
+    bundles_res = await db.execute(select(models.Bundle).where(models.Bundle.user_id == user.id).order_by(models.Bundle.created_at.desc()))
+    urls_res = await db.execute(select(models.URL).where(models.URL.user_id == user.id).order_by(models.URL.created_at.desc()))
+    
+    bundles = bundles_res.scalars().all()
+    urls = urls_res.scalars().all()
+    
+    drops = []
+    for b in bundles:
+        drops.append({
+            "type": "bundle",
+            "slug": b.slug,
+            "title": b.title,
+            "description": b.description,
+            "theme_color": b.theme_color,
+            "created_at": b.created_at
+        })
+    for u in urls:
+        drops.append({
+            "type": "url",
+            "slug": u.slug,
+            "title": u.meta_title or u.slug,
+            "description": u.meta_description,
+            "theme_color": "#00f2ff", # Default for URLs
+            "created_at": u.created_at
+        })
+        
+    return {
+        "user": {
+            "name": user.name,
+            "profile_pic": user.profile_pic,
+            "username": user.username
+        },
+        "drops": sorted(drops, key=lambda x: x["created_at"], reverse=True)
+    }
+
 @app.delete("/api/drops/{slug}")
 async def delete_drop(
     slug: str, 
