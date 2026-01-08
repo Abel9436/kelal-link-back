@@ -51,3 +51,5 @@ google-auth==2.41.1
 google-auth-oauthlib==1.2.3
 python-jose[cryptography]==3.5.0
 requests==2.32.3
+sqladmin==0.20.1
+itsdangerous==2.2.0

@@ -32,6 +32,7 @@ class URLBase(BaseModel):
     password: Optional[str] = None
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: Optional[bool] = False
 
 class URLCreate(URLBase):
     pass
@@ -44,8 +45,10 @@ class URLUpdate(BaseModel):
     password: Optional[str] = None
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: Optional[bool] = None
 
 class URLInfo(BaseModel):
+    id: int
     long_url: str
     slug: str
     clicks: int
@@ -54,6 +57,7 @@ class URLInfo(BaseModel):
     has_password: bool = False
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: bool = False
     created_at: datetime
     user_id: Optional[int] = None
 
@@ -83,6 +87,8 @@ class BundleCreate(BaseModel):
     password: Optional[str] = None
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: Optional[bool] = False
+    access_level: Optional[str] = "restricted"
 
 class BundleUpdate(BaseModel):
     custom_slug: Optional[str] = None
@@ -101,8 +107,11 @@ class BundleUpdate(BaseModel):
     password: Optional[str] = None
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: Optional[bool] = None
+    access_level: Optional[str] = None
 
 class BundleInfo(BaseModel):
+    id: int
     slug: str
     title: str
     description: Optional[str]
@@ -120,6 +129,10 @@ class BundleInfo(BaseModel):
     has_password: bool = False
     meta_title: Optional[str] = None
     meta_description: Optional[str] = None
+    is_cloaked: bool = False
+    access_level: str = "restricted"
+    manager_token: Optional[str] = None
+    analyst_token: Optional[str] = None
     created_at: datetime
     user_id: Optional[int] = None
 
@@ -136,3 +149,33 @@ class AnalyticsReport(BaseModel):
     clicks_over_time: List[dict] # {date: str, count: int}
     device_stats: List[dict] # {device: str, count: int}
     top_referers: List[dict] # {referer: str, count: int}
+
+class CollaborationCreate(BaseModel):
+    collaborator_email: EmailStr
+    bundle_id: Optional[int] = None # Optional for account-wide, but we'll use it for per-studio
+    role: str = "manager"
+
+class CollaborationInfo(BaseModel):
+    id: int
+    owner_id: int
+    collaborator_id: int
+    bundle_id: Optional[int]
+    collaborator_name: Optional[str]
+    collaborator_username: Optional[str]
+    collaborator_pic: Optional[str]
+    bundle_title: Optional[str] = None
+    role: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class NotificationInfo(BaseModel):
+    id: int
+    type: str
+    title: str
+    message: str
+    is_read: bool
+    link: Optional[str] = None
+    created_at: datetime
+    class Config:
+        from_attributes = True

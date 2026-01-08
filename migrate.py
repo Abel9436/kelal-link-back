@@ -53,6 +53,7 @@ async def migrate():
     
     # URL columns
     await add_column("urls", "max_clicks", "INTEGER")
+    await add_column("urls", "is_cloaked", "BOOLEAN DEFAULT FALSE")
     await add_column("urls", "expires_at", "TIMESTAMP WITH TIME ZONE")
     await add_column("urls", "password", "VARCHAR")
     await add_column("urls", "meta_title", "VARCHAR")
@@ -65,12 +66,33 @@ async def migrate():
     await add_column("bundles", "title_color", "VARCHAR DEFAULT '#ffffff'")
     await add_column("bundles", "card_color", "VARCHAR DEFAULT 'rgba(255,255,255,0.05)'")
     await add_column("bundles", "max_clicks", "INTEGER")
+    await add_column("bundles", "is_cloaked", "BOOLEAN DEFAULT FALSE")
     await add_column("bundles", "expires_at", "TIMESTAMP WITH TIME ZONE")
     await add_column("bundles", "password", "VARCHAR")
     await add_column("bundles", "meta_title", "VARCHAR")
     await add_column("bundles", "meta_description", "VARCHAR")
     await add_column("bundles", "bg_image", "VARCHAR")
     await add_column("bundles", "profile_image", "VARCHAR")
+    await add_column("bundles", "access_level", "VARCHAR DEFAULT 'restricted'")
+
+    # Collaboration table
+    await add_column("collaborations", "bundle_id", "INTEGER REFERENCES bundles(id)")
+
+    # Notifications table
+    async with engine.begin() as conn:
+        print("Ensuring notifications table exists...")
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR NOT NULL,
+                title VARCHAR NOT NULL,
+                message TEXT NOT NULL,
+                is_read BOOLEAN DEFAULT FALSE,
+                link VARCHAR,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
 
     await engine.dispose()
     print("Migration protocol complete.")
