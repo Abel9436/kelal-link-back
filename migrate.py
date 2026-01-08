@@ -74,6 +74,8 @@ async def migrate():
     await add_column("bundles", "bg_image", "VARCHAR")
     await add_column("bundles", "profile_image", "VARCHAR")
     await add_column("bundles", "access_level", "VARCHAR DEFAULT 'restricted'")
+    await add_column("bundles", "manager_token", "VARCHAR")
+    await add_column("bundles", "analyst_token", "VARCHAR")
 
     # Collaboration table
     await add_column("collaborations", "bundle_id", "INTEGER REFERENCES bundles(id)")
