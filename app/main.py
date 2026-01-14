@@ -803,6 +803,8 @@ async def get_stats(
 @app.get("/api/public-stats")
 async def get_public_stats(db: AsyncSession = Depends(database.get_db)):
     # 1. Total Counts
+    total_users_res = await db.execute(select(func.count(models.User.id)))
+    total_users = total_users_res.scalar() or 0
     total_urls_res = await db.execute(select(func.count(models.URL.id)))
     total_urls = total_urls_res.scalar() or 0
     total_bundles_res = await db.execute(select(func.count(models.Bundle.id)))
@@ -827,6 +829,8 @@ async def get_public_stats(db: AsyncSession = Depends(database.get_db)):
     urls_7d = urls_7d_res.scalar() or 0
     bundles_7d_res = await db.execute(select(func.count(models.Bundle.id)).where(models.Bundle.created_at >= last_7d))
     bundles_7d = bundles_7d_res.scalar() or 0
+    users_7d_res = await db.execute(select(func.count(models.User.id)).where(models.User.created_at >= last_7d))
+    users_7d = users_7d_res.scalar() or 0
     growth_7d = urls_7d + bundles_7d
 
     # 4. Device Distribution (Top 5)
@@ -858,7 +862,9 @@ async def get_public_stats(db: AsyncSession = Depends(database.get_db)):
     click_history = [{"date": str(row[0].date()), "count": row[1]} for row in history_res.fetchall()]
 
     return {
-        "total_links": total_urls + total_bundles,
+        "total_users": total_users,
+        "users_7d": users_7d,
+        "total_links": total_urls,
         "total_bundles": total_bundles,
         "total_clicks": total_clicks,
         "clicks_24h": clicks_24h,
