@@ -66,7 +66,7 @@ class URLInfo(BaseModel):
 
 class BundleItem(BaseModel):
     label: str
-    url: HttpUrl
+    url: str
     is_spotlight: Optional[bool] = False
 
 class BundleCreate(BaseModel):
