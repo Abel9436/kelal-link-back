@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request, Header
 from fastapi.responses import RedirectResponse, Response, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func, delete
 from starlette.middleware.sessions import SessionMiddleware
@@ -569,7 +570,11 @@ async def update_bundle(
     if data.title: bundle_obj.title = data.title
     if data.description is not None: bundle_obj.description = data.description
     if data.items is not None:
-        bundle_obj.items = [item.dict() for item in data.items]
+        # Use jsonable_encoder to safely convert HttpUrl and other types to strings
+        bundle_obj.items = jsonable_encoder([
+            {"label": i.label, "url": str(i.url), "is_spotlight": i.is_spotlight} 
+            for i in data.items
+        ])
     if data.theme_color: bundle_obj.theme_color = data.theme_color
     if data.bg_color: bundle_obj.bg_color = data.bg_color
     if data.text_color: bundle_obj.text_color = data.text_color
@@ -720,7 +725,7 @@ async def create_bundle(
     new_bundle = models.Bundle(
         title=data.title,
         description=data.description,
-        items=[{"label": item.label, "url": str(item.url)} for item in data.items],
+        items=jsonable_encoder([{"label": item.label, "url": str(item.url), "is_spotlight": item.is_spotlight} for item in data.items]),
         theme_color=data.theme_color,
         bg_color=data.bg_color,
         text_color=data.text_color,
