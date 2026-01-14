@@ -800,6 +800,74 @@ async def get_stats(
 
     return {"title": getattr(obj, "title", obj.slug), "total_clicks": obj.clicks, "clicks_history": clicks_history, "device_stats": device_stats, "top_referers": top_referers}
 
+@app.get("/api/public-stats")
+async def get_public_stats(db: AsyncSession = Depends(database.get_db)):
+    # 1. Total Counts
+    total_urls_res = await db.execute(select(func.count(models.URL.id)))
+    total_urls = total_urls_res.scalar() or 0
+    total_bundles_res = await db.execute(select(func.count(models.Bundle.id)))
+    total_bundles = total_bundles_res.scalar() or 0
+    
+    # 2. Total Clicks (Global Sum)
+    total_clicks_urls_res = await db.execute(select(func.coalesce(func.sum(models.URL.clicks), 0)))
+    total_clicks_urls = total_clicks_urls_res.scalar() or 0
+    total_clicks_bundles_res = await db.execute(select(func.coalesce(func.sum(models.Bundle.clicks), 0)))
+    total_clicks_bundles = total_clicks_bundles_res.scalar() or 0
+    total_clicks = total_clicks_urls + total_clicks_bundles
+    
+    # 3. Growth metrics
+    now = datetime.now(timezone.utc)
+    last_24h = now - timedelta(hours=24)
+    last_7d = now - timedelta(days=7)
+    
+    clicks_24h_res = await db.execute(select(func.count(models.Click.id)).where(models.Click.timestamp >= last_24h))
+    clicks_24h = clicks_24h_res.scalar() or 0
+    
+    urls_7d_res = await db.execute(select(func.count(models.URL.id)).where(models.URL.created_at >= last_7d))
+    urls_7d = urls_7d_res.scalar() or 0
+    bundles_7d_res = await db.execute(select(func.count(models.Bundle.id)).where(models.Bundle.created_at >= last_7d))
+    bundles_7d = bundles_7d_res.scalar() or 0
+    growth_7d = urls_7d + bundles_7d
+
+    # 4. Device Distribution (Top 5)
+    devices_res = await db.execute(
+        select(models.Click.device_type, func.count(models.Click.id))
+        .group_by(models.Click.device_type)
+        .order_by(func.count(models.Click.id).desc())
+        .limit(5)
+    )
+    device_stats = [{"device": row[0] or "Unknown", "count": row[1]} for row in devices_res.fetchall()]
+
+    # 5. Global Referrers (Top 5)
+    referrers_res = await db.execute(
+        select(models.Click.referer, func.count(models.Click.id))
+        .group_by(models.Click.referer)
+        .order_by(func.count(models.Click.id).desc())
+        .limit(5)
+    )
+    top_referrers = [{"referer": (row[0] or "Direct").replace("https://", "").replace("http://", "").split("/")[0], "count": row[1]} for row in referrers_res.fetchall()]
+
+    # 6. Weekly History (Last 7 Days)
+    history_expr = func.date_trunc('day', models.Click.timestamp)
+    history_res = await db.execute(
+        select(history_expr.label('d'), func.count(models.Click.id))
+        .where(models.Click.timestamp >= last_7d)
+        .group_by(history_expr)
+        .order_by('d')
+    )
+    click_history = [{"date": str(row[0].date()), "count": row[1]} for row in history_res.fetchall()]
+
+    return {
+        "total_links": total_urls + total_bundles,
+        "total_bundles": total_bundles,
+        "total_clicks": total_clicks,
+        "clicks_24h": clicks_24h,
+        "growth_7d": growth_7d,
+        "device_stats": device_stats,
+        "top_referrers": top_referrers,
+        "click_history": click_history
+    }
+
 @app.get("/api/qr/{slug}")
 async def get_qr(slug: str, color: str = "black", bg: str = "white"):
     url = f"{FRONTEND_URL}/{slug}"
